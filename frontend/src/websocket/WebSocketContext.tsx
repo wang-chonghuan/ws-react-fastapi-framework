@@ -1,9 +1,9 @@
 // src/contexts/WebSocketContext.tsx
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { WebSocketManager } from './WebSocketManager';
 import { SubscriptionManager } from './SubscriptionManager';
 import { WebSocketStatus } from './types';
+import { WebSocketManager } from './WebSocketManager';
 
 interface WebSocketContextValue {
   wsManager: WebSocketManager;

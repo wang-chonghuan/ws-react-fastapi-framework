@@ -33,6 +33,7 @@ export class WebSocketManager {
       this.ws = new WebSocket(this.url);
       
       this.ws.onopen = () => {
+        console.log('WebSocket connected successfully');
         this.updateStatus(WebSocketStatus.CONNECTED);
         if (this.reconnectTimer) {
           window.clearInterval(this.reconnectTimer);
@@ -49,7 +50,8 @@ export class WebSocketManager {
         }
       };
 
-      this.ws.onclose = () => {
+      this.ws.onclose = (event) => {
+        console.log('WebSocket closed:', event.code, event.reason);
         this.updateStatus(WebSocketStatus.DISCONNECTED);
         this.scheduleReconnect();
       };
@@ -57,7 +59,6 @@ export class WebSocketManager {
       this.ws.onerror = (error) => {
         console.error('WebSocket error:', error);
         this.updateStatus(WebSocketStatus.ERROR);
-        this.ws?.close();
       };
 
     } catch (error) {
@@ -85,7 +86,7 @@ export class WebSocketManager {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
     } else {
-      console.error('Attempted to send message while WebSocket is not connected');
+      console.warn('WebSocket is not connected. Message not sent:', message);
     }
   }
 
@@ -121,8 +122,10 @@ export class WebSocketManager {
       return;
     }
 
+    console.log('Scheduling reconnection...');
     this.reconnectTimer = window.setInterval(() => {
       if (this.status !== WebSocketStatus.CONNECTED) {
+        console.log('Attempting to reconnect...');
         this.connect();
       }
     }, 5000); // 每5秒尝试重连一次

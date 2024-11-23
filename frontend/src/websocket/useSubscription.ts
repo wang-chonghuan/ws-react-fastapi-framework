@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { 
   SubscriptionConfig, 
   SubscriptionData,
-  WebSocketStatus 
+  WebSocketStatus,
 } from '../websocket/types';
 import { useWebSocket } from './WebSocketContext';
 

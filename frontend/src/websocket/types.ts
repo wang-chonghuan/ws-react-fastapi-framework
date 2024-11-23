@@ -2,36 +2,69 @@
 
 // 订阅类型枚举
 export enum SubscriptionType {
-  SE = 'SE',  // 单参数历史值事件
-  ME = 'ME'   // 多参数最新值事件
+  PARAM_HISTORY = 'PARAM_HISTORY',  // 单参数历史值
+  MULTI_PARAM = 'MULTI_PARAM'       // 多参数最新值
 }
 
-// SE订阅配置
-export interface SESubscriptionConfig {
-  type: SubscriptionType.SE;
-  paramId: string;     // 参数ID
-  period: number;      // 时间段P
-  samples: number;     // 采样数N
-  window: number;      // 聚合窗口W
-  interval: number;    // 更新间隔X(分钟)
+// 单参数历史值订阅配置
+export interface ParamHistorySubscriptionConfig {
+  type: SubscriptionType.PARAM_HISTORY;
+  plantId: string;
+  component: string;
+  parameter: string;
+  range: string;
+  aggregateWindow: string;
+  queryPeriod: string;
 }
 
-// ME订阅配置
-export interface MESubscriptionConfig {
-  type: SubscriptionType.ME;
-  paramIds: string[];  // 参数ID列表
-  interval: number;    // 更新间隔Y(秒)
+// 响应
+export interface ParamHistoryPoint {
+  time: string
+  value: number
+}
+
+export interface ParamHistoryRes {
+  task_id: string
+  plantId: string
+  component: string
+  parameter: string
+  data: ParamHistoryPoint[]
+}
+
+// 多参数最新值订阅配置
+export interface MultiParamSubscriptionConfig {
+  type: SubscriptionType.MULTI_PARAM;
+  plantId: string;
+  paramList: string[];
+  startTime: string;
+  interval: number;
+  queryPeriod: number;
+}
+
+// 响应
+// 多参数响应接口
+export interface ParamValue {
+  paramCompKey: string
+  values: Array<{
+    time: string
+    value: number
+  }>
+}
+
+export interface MultiParameterDataResponse {
+  plantId: string
+  paramValues: ParamValue[]
 }
 
 // 统一订阅配置类型
-export type SubscriptionConfig = SESubscriptionConfig | MESubscriptionConfig;
+export type SubscriptionConfig = ParamHistorySubscriptionConfig | MultiParamSubscriptionConfig;
 
-// 订阅消息的数据结构
+// 更新订阅数据接口
 export interface SubscriptionData {
-  id: string;         // 订阅ID
-  timestamp: number;  // 时间戳
-  values: any;        // 数据值，具体类型取决于订阅类型
-  error?: string;     // 可能的错误信息
+  id: string;
+  timestamp: number;
+  values: ParamHistoryRes | MultiParameterDataResponse | null;
+  error?: string;
 }
 
 // WebSocket消息类型

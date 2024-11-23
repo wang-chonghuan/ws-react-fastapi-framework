@@ -5,7 +5,7 @@ import {
   Subscription, 
   SubscriptionCallback, 
   WSMessage,
-  SubscriptionData 
+  SubscriptionData,
 } from './types';
 import { WebSocketManager } from './WebSocketManager';
 

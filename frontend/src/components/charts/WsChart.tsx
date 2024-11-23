@@ -1,4 +1,8 @@
-import { SubscriptionType } from "../../websocket/types";
+import { 
+  SubscriptionType, 
+  ParamHistorySubscriptionConfig,
+  ParamHistoryRes
+} from "../../websocket/types";
 import { useSubscription } from "../../websocket/useSubscription";
 import { useMemo, useState, useEffect } from "react";
 
@@ -8,28 +12,28 @@ interface WsChartProps {
 }
 
 function WsChart({ title, className = '' }: WsChartProps) {
-  // Use useMemo to ensure the stability of the subscription configuration object
-  const subscriptionConfig = useMemo(() => ({
-    id: "unique-subscription-id",
-    config: {
-      type: SubscriptionType.SE as const,
-      paramId: "param1",
-      period: 3600,    // 1 hour
-      samples: 60,     // 60 sample points
-      window: 60,      // 60-second aggregation window
-      interval: 1      // Update every 1 minute
-    }
-  }), []); // Empty dependency array, as these configurations are static
+  // 构建订阅配置
+  const config: ParamHistorySubscriptionConfig = useMemo(() => ({
+    type: SubscriptionType.PARAM_HISTORY,
+    plantId: "plant1",
+    component: "comp1",
+    parameter: "param1",
+    range: "1d",           // 1天的数据
+    aggregateWindow: "1h", // 1小时聚合
+    queryPeriod: "10s"      // 查询周期10秒
+  }), []); 
 
-  const { data, error, isLoading, status } = useSubscription(subscriptionConfig);
+  const { data, error, isLoading, status } = useSubscription({
+    id: "unique-subscription-id",
+    config,
+    autoResubscribe: true
+  });
   
-  // Add message statistics status
   const [messageStats, setMessageStats] = useState({
     count: 0,
     lastMessageSize: 0,
   });
 
-  // Update statistics when new data is received
   useEffect(() => {
     if (data) {
       setMessageStats(prev => ({
@@ -39,24 +43,54 @@ function WsChart({ title, className = '' }: WsChartProps) {
     }
   }, [data]);
 
+  useEffect(() => {
+    if (data) {
+      console.log('Received subscription data:', data);
+      console.log('Values:', data.values);
+    }
+  }, [data]);
+
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
   
+  // 更精确的类型检查和解析
+  const historyData = data?.values as ParamHistoryRes | null;
+  
+  // 添加安全检查
+  const latestValue = historyData?.data && historyData.data.length > 0
+    ? historyData.data[historyData.data.length - 1]
+    : null;
+
   return (
     <div className={`bg-white rounded-lg shadow p-4 ${className}`}>
       <h3 className="text-md font-medium mb-4">{title}</h3>
+      
+      <div className="text-xs text-gray-500 mb-2">
+        Raw data: {JSON.stringify(data, null, 2)}
+      </div>
+      
       <div className="w-full h-[30vh] overflow-y-auto text-sm space-y-1.5">
-        <div>Subscription Type: {subscriptionConfig.config.type}</div>
-        <div>Parameter ID: {subscriptionConfig.config.paramId}</div>
-        <div>Sample Period: {subscriptionConfig.config.period}s</div>
-        <div>Sample Points: {subscriptionConfig.config.samples}</div>
-        <div>Aggregation Window: {subscriptionConfig.config.window}s</div>
-        <div>Update Interval: {subscriptionConfig.config.interval}min</div>
+        <div>Subscription Type: {config.type}</div>
+        <div>Plant ID: {config.plantId}</div>
+        <div>Component: {config.component}</div>
+        <div>Parameter: {config.parameter}</div>
+        <div>Range: {config.range}</div>
+        <div>Aggregate Window: {config.aggregateWindow}</div>
+        <div>Query Period: {config.queryPeriod}</div>
         <div>Connection Status: {status}</div>
         <div>Messages Received: {messageStats.count}</div>
         <div>Latest Message Size: {messageStats.lastMessageSize} bytes</div>
-        <div>Data Type: {data ? typeof data : 'unknown'}</div>
-        <div>Data Structure: {data ? Array.isArray(data) ? 'Array' : 'Object' : 'unknown'}</div>
+        {historyData && (
+          <>
+            <div>Task ID: {historyData.task_id}</div>
+            <div>Data Points: {historyData.data?.length || 0}</div>
+            <div>Latest Value: {
+              latestValue
+                ? `${latestValue.value} (${latestValue.time})`
+                : 'No data'
+            }</div>
+          </>
+        )}
       </div>
     </div>
   );

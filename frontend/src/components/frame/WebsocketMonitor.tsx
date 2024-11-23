@@ -1,6 +1,6 @@
 // src/components/WebSocketMonitor.tsx
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useWebSocketDebug } from '../../websocket/useWebSocketDebug';
 import { SubscriptionType } from '../../websocket/types';
 
@@ -49,24 +49,28 @@ export const WebSocketMonitor: React.FC<WebSocketMonitorProps> = ({ onClose }) =
     let info = '';
     const config = subscription.config;
 
-    if (config.type === SubscriptionType.SE) {
+    if (config.type === SubscriptionType.PARAM_HISTORY) {
       info = [
-        `ID:        ${subscription.id}`,
-        `Type:      ${config.type}`,
-        `Parameter: ${config.paramId}`,
-        `Period:    ${config.period}`,
-        `Samples:   ${config.samples}`,
-        `Window:    ${config.window}`,
-        `Interval:  ${config.interval}min`,
-        `Updated:   ${subscription.lastUpdate?.toLocaleTimeString() || 'Never'}`
+        `ID:              ${subscription.id}`,
+        `Type:            ${config.type}`,
+        `Plant ID:        ${config.plantId}`,
+        `Component:       ${config.component}`,
+        `Parameter:       ${config.parameter}`,
+        `Range:          ${config.range}`,
+        `Aggregate:      ${config.aggregateWindow}`,
+        `Query Period:   ${config.queryPeriod}`,
+        `Last Update:    ${subscription.lastUpdate?.toLocaleTimeString() || 'Never'}`
       ].join('\n');
-    } else {
+    } else if (config.type === SubscriptionType.MULTI_PARAM) {
       info = [
-        `ID:         ${subscription.id}`,
-        `Type:       ${config.type}`,
-        `Parameters: ${config.paramIds.join(', ')}`,
-        `Interval:   ${config.interval}s`,
-        `Updated:    ${subscription.lastUpdate?.toLocaleTimeString() || 'Never'}`
+        `ID:              ${subscription.id}`,
+        `Type:            ${config.type}`,
+        `Plant ID:        ${config.plantId}`,
+        `Parameters:      ${config.paramList.join(', ')}`,
+        `Start Time:     ${config.startTime}`,
+        `Interval:       ${config.interval}s`,
+        `Query Period:   ${config.queryPeriod}h`,
+        `Last Update:    ${subscription.lastUpdate?.toLocaleTimeString() || 'Never'}`
       ].join('\n');
     }
 
