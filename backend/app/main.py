@@ -1,5 +1,8 @@
+# main.py
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from websocket_server import init_websocket
 
 app = FastAPI(
     title="FastAPI App",
@@ -15,6 +18,9 @@ app.add_middleware(
     allow_methods=["*"],  # 允许所有方法
     allow_headers=["*"],  # 允许所有头
 )
+
+# 初始化WebSocket服务
+init_websocket(app)
 
 @app.get("/")
 async def root():

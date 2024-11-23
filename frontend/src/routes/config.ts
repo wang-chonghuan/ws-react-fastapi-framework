@@ -1,6 +1,7 @@
-import { Newspaper, MessageCircle, LucideIcon } from 'lucide-react';
+import { Newspaper, MessageCircle, LucideIcon, LineChart } from 'lucide-react';
 import News from '../pages/News';
 import Chat from '../pages/Chat';
+import Charts from '../pages/Charts';
 
 interface RouteConfig {
   path: string;
@@ -21,5 +22,11 @@ export const routes: RouteConfig[] = [
     component: Chat,
     icon: MessageCircle,
     label: 'Chat'
+  },
+  {
+    path: '/charts',
+    component: Charts,
+    icon: LineChart,
+    label: 'Charts'
   }
 ];
